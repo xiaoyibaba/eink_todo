@@ -46,7 +46,6 @@ struct Stats {
 
 struct Settings {
   int resetHour = 4;
-  bool buzzer = true;
   int tzMin = 480;  // UTC+8
 };
 

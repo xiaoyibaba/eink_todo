@@ -158,7 +158,6 @@ class SimPlatform : public Platform {
   int port = 8090;
   bool sleeping = false;
   int64_t wakeAt = 0;
-  SDL_AudioDeviceID audio = 0;
   HttpHandler handler;
   SimFs fsImpl;
   SimEpd epdImpl;
@@ -178,22 +177,6 @@ class SimPlatform : public Platform {
     return wifiConfigured;
   }
   bool keyDown(Key k) override { return keys[int(k) - 1]; }
-  void beep(const Note* notes, size_t n) override {
-    printf("[蜂鸣器]");
-    for (size_t i = 0; i < n; ++i) printf(" %dHz/%dms", notes[i].freq, notes[i].ms);
-    printf("\n");
-    if (!audio) return;
-    const int rate = 22050;
-    std::vector<int16_t> buf;
-    for (size_t i = 0; i < n; ++i) {
-      int len = rate * notes[i].ms / 1000;
-      for (int s = 0; s < len; ++s) {
-        bool hi = notes[i].freq && (s * 2 * notes[i].freq / rate) % 2 == 0;
-        buf.push_back(notes[i].freq ? (hi ? 2500 : -2500) : 0);
-      }
-    }
-    SDL_QueueAudio(audio, buf.data(), static_cast<Uint32>(buf.size() * 2));
-  }
   int batteryPercent() override { return battery; }
   NetMode startNetwork(std::string& url) override {
     if (wifiConfigured) {
@@ -459,17 +442,10 @@ int runInteractive(Device& dev, int port) {
   p.epdImpl.partialMs = 450;
   p.epdImpl.delayFn = [](uint32_t ms) { SDL_Delay(ms); };
 
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     fprintf(stderr, "SDL 初始化失败：%s\n", SDL_GetError());
     return 1;
   }
-  SDL_AudioSpec want{}, have{};
-  want.freq = 22050;
-  want.format = AUDIO_S16SYS;
-  want.channels = 1;
-  want.samples = 1024;
-  p.audio = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
-  if (p.audio) SDL_PauseAudioDevice(p.audio, 0);
 
   SDL_Window* win = SDL_CreateWindow("eink-todo 模拟器", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W,
                                      H + 2 * BAR_H, SDL_WINDOW_ALLOW_HIGHDPI);

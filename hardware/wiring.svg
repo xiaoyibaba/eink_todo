@@ -1,0 +1,226 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1400" height="1140" viewBox="0 0 1400 1140"
+     font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <!-- 引脚以 firmware/src/esp32/main.cpp 的 pins:: 为准；改引脚时两边一起改 -->
+  <defs>
+    <symbol id="gnd" overflow="visible">
+      <path d="M0 0 V12 M-10 12 H10 M-6 17 H6 M-2 22 H2" stroke="#444" stroke-width="2" fill="none"/>
+    </symbol>
+    <symbol id="vcc" overflow="visible">
+      <path d="M0 0 V-12 M-10 -12 H10" stroke="#d33" stroke-width="2" fill="none"/>
+      <text x="0" y="-17" text-anchor="middle" font-size="12" fill="#d33" font-weight="bold">3V3</text>
+    </symbol>
+  </defs>
+  <style>
+    .w { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+    .pad { fill: #c9a227; stroke: #8a6d10; }
+    .pin { fill: #fff; font-weight: bold; }
+    .gpio { fill: #9aa; font-size: 11px; font-weight: normal; }
+    .lbl { font-size: 12px; }
+    .muted { fill: #777; font-size: 12px; }
+    .dot { fill: #333; }
+  </style>
+
+  <rect width="1400" height="1140" fill="#fff"/>
+
+  <!-- 标题 -->
+  <text x="40" y="50" font-size="24" font-weight="bold" fill="#222">eink-todo 接线图</text>
+  <text x="40" y="78" fill="#666">XIAO ESP32S3 正面朝上、USB-C 朝上画的引脚顺序。引脚以 firmware/src/esp32/main.cpp 为准，转接板丝印以实物为准。</text>
+
+  <!-- ========== XIAO ESP32S3 ========== -->
+  <rect x="620" y="122" width="80" height="34" rx="6" fill="#bbb" stroke="#888"/>
+  <text x="660" y="144" text-anchor="middle" font-size="11" fill="#333">USB-C</text>
+  <rect x="560" y="150" width="200" height="410" rx="14" fill="#2d2d2d"/>
+  <text x="660" y="186" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">XIAO</text>
+  <text x="660" y="206" text-anchor="middle" fill="#fff" font-size="13">ESP32S3</text>
+
+  <!-- 左排 D0–D6 -->
+  <g>
+    <rect class="pad" x="553" y="232" width="14" height="16" rx="3"/>
+    <rect class="pad" x="553" y="277" width="14" height="16" rx="3"/>
+    <rect class="pad" x="553" y="322" width="14" height="16" rx="3"/>
+    <rect class="pad" x="553" y="367" width="14" height="16" rx="3"/>
+    <rect class="pad" x="553" y="412" width="14" height="16" rx="3"/>
+    <rect class="pad" x="553" y="457" width="14" height="16" rx="3"/>
+    <!-- D6 不接（UART0 TX，开机会被 ROM 日志拉动） -->
+    <rect x="553" y="502" width="14" height="16" rx="3" fill="#666" stroke="#555"/>
+    <text class="pin" x="574" y="245">D0<tspan class="gpio"> GPIO1</tspan></text>
+    <text class="pin" x="574" y="290">D1<tspan class="gpio"> GPIO2</tspan></text>
+    <text class="pin" x="574" y="335">D2<tspan class="gpio"> GPIO3</tspan></text>
+    <text class="pin" x="574" y="380">D3<tspan class="gpio"> GPIO4</tspan></text>
+    <text class="pin" x="574" y="425">D4<tspan class="gpio"> GPIO5</tspan></text>
+    <text class="pin" x="574" y="470">D5<tspan class="gpio"> GPIO6</tspan></text>
+    <text class="pin" x="574" y="515" fill="#888">D6<tspan class="gpio"> 不接</tspan></text>
+  </g>
+  <!-- 右排 5V GND 3V3 D10–D7 -->
+  <g>
+    <rect class="pad" x="753" y="232" width="14" height="16" rx="3"/>
+    <rect class="pad" x="753" y="277" width="14" height="16" rx="3"/>
+    <rect class="pad" x="753" y="322" width="14" height="16" rx="3"/>
+    <rect class="pad" x="753" y="367" width="14" height="16" rx="3"/>
+    <rect class="pad" x="753" y="412" width="14" height="16" rx="3"/>
+    <rect class="pad" x="753" y="457" width="14" height="16" rx="3"/>
+    <rect class="pad" x="753" y="502" width="14" height="16" rx="3"/>
+    <text class="pin" x="746" y="245" text-anchor="end">5V</text>
+    <text class="pin" x="746" y="290" text-anchor="end">GND</text>
+    <text class="pin" x="746" y="335" text-anchor="end">3V3</text>
+    <text class="pin" x="746" y="380" text-anchor="end"><tspan class="gpio">GPIO9 </tspan>D10</text>
+    <text class="pin" x="746" y="425" text-anchor="end"><tspan class="gpio">GPIO8 </tspan>D9</text>
+    <text class="pin" x="746" y="470" text-anchor="end"><tspan class="gpio">GPIO7 </tspan>D8</text>
+    <text class="pin" x="746" y="515" text-anchor="end"><tspan class="gpio">GPIO44 </tspan>D7</text>
+  </g>
+  <!-- 5V 不接 -->
+  <path class="w" d="M767 240 H800" stroke="#bbb" stroke-dasharray="4 4"/>
+  <text x="808" y="245" class="muted">不接</text>
+
+  <!-- ========== DESPI-C02 转接板 ========== -->
+  <rect x="1050" y="225" width="180" height="415" rx="10" fill="#1d4f91"/>
+  <text x="1140" y="252" text-anchor="middle" fill="#fff" font-weight="bold">DESPI-C02</text>
+  <text x="1140" y="268" text-anchor="middle" fill="#cde" font-size="11">屏幕转接板</text>
+  <g>
+    <rect class="pad" x="1043" y="277" width="14" height="16" rx="3"/>
+    <rect class="pad" x="1043" y="322" width="14" height="16" rx="3"/>
+    <rect class="pad" x="1043" y="367" width="14" height="16" rx="3"/>
+    <rect class="pad" x="1043" y="412" width="14" height="16" rx="3"/>
+    <rect class="pad" x="1043" y="457" width="14" height="16" rx="3"/>
+    <rect class="pad" x="1043" y="502" width="14" height="16" rx="3"/>
+    <rect class="pad" x="1043" y="547" width="14" height="16" rx="3"/>
+    <rect class="pad" x="1043" y="592" width="14" height="16" rx="3"/>
+    <text class="pin" x="1064" y="290">GND</text>
+    <text class="pin" x="1064" y="335">VCC</text>
+    <text class="pin" x="1064" y="380">SDI</text>
+    <text class="pin" x="1064" y="425">D/C</text>
+    <text class="pin" x="1064" y="470">SCK</text>
+    <text class="pin" x="1064" y="515">CS</text>
+    <text class="pin" x="1064" y="560">RES</text>
+    <text class="pin" x="1064" y="605">BUSY</text>
+  </g>
+  <text x="1140" y="630" text-anchor="middle" fill="#cde" font-size="11">RESE 拨码：上电前确认</text>
+
+  <!-- FPC + 屏 -->
+  <rect x="1230" y="400" width="52" height="60" fill="#e8a33a" opacity="0.85"/>
+  <text x="1331" y="580" text-anchor="middle" class="muted">24pin FPC 排线</text>
+  <rect x="1282" y="300" width="98" height="260" rx="4" fill="#f4f4ef" stroke="#999"/>
+  <text x="1331" y="420" text-anchor="middle" font-weight="bold" fill="#333">7.5寸屏</text>
+  <text x="1331" y="440" text-anchor="middle" font-size="12" fill="#555">GDEY075T7</text>
+
+  <!-- XIAO 右排 → C02：直连 -->
+  <path class="w" d="M767 285 H1043" stroke="#444"/>
+  <path class="w" d="M767 330 H1043" stroke="#d33"/>
+  <path class="w" d="M767 375 H1043" stroke="#1f77b4"/>
+  <path class="w" d="M767 420 H1043" stroke="#9467bd"/>
+  <path class="w" d="M767 465 H1043" stroke="#ff7f0e"/>
+  <path class="w" d="M767 510 H1043" stroke="#2ca02c"/>
+  <text x="905" y="279" text-anchor="middle" class="lbl" fill="#444">GND</text>
+  <text x="905" y="324" text-anchor="middle" class="lbl" fill="#d33">3.3V 供电</text>
+  <text x="905" y="369" text-anchor="middle" class="lbl" fill="#1f77b4">数据 MOSI</text>
+  <text x="905" y="414" text-anchor="middle" class="lbl" fill="#9467bd">命令/数据 DC</text>
+  <text x="905" y="459" text-anchor="middle" class="lbl" fill="#ff7f0e">时钟 SCK</text>
+  <text x="905" y="504" text-anchor="middle" class="lbl" fill="#2ca02c">片选 CS</text>
+
+  <!-- D5 → RES、D4 → BUSY：从芯片下方绕过去 -->
+  <path class="w" d="M553 465 H530 V750 H990 V555 H1043" stroke="#8c564b"/>
+  <path class="w" d="M553 420 H515 V790 H1010 V600 H1043" stroke="#e377c2"/>
+  <text x="760" y="744" text-anchor="middle" class="lbl" fill="#8c564b">复位 RST（D5 → RES）</text>
+  <text x="760" y="784" text-anchor="middle" class="lbl" fill="#e377c2">忙信号 BUSY（D4 → BUSY）</text>
+
+
+  <!-- ========== 按键 ========== -->
+  <!-- 上 D1 -->
+  <path class="w" d="M553 285 H440" stroke="#17a2b8"/>
+  <path class="w" d="M380 285 H330" stroke="#444"/>
+  <circle cx="440" cy="285" r="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+  <circle cx="380" cy="285" r="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+  <path d="M376 275 H444 M410 275 V265 M402 265 H418" stroke="#333" stroke-width="2" fill="none"/>
+  <use xlink:href="#gnd" href="#gnd" x="330" y="285"/>
+  <text x="440" y="303" text-anchor="middle" class="muted">NO</text>
+  <text x="380" y="303" text-anchor="middle" class="muted">C</text>
+  <text x="300" y="290" text-anchor="end" font-weight="bold" fill="#17a2b8">按键·上</text>
+  <!-- 下 D2 -->
+  <path class="w" d="M553 330 H440" stroke="#17a2b8"/>
+  <path class="w" d="M380 330 H330" stroke="#444"/>
+  <circle cx="440" cy="330" r="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+  <circle cx="380" cy="330" r="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+  <path d="M376 320 H444 M410 320 V310 M402 310 H418" stroke="#333" stroke-width="2" fill="none"/>
+  <use xlink:href="#gnd" href="#gnd" x="330" y="330"/>
+  <text x="440" y="348" text-anchor="middle" class="muted">NO</text>
+  <text x="380" y="348" text-anchor="middle" class="muted">C</text>
+  <text x="300" y="335" text-anchor="end" font-weight="bold" fill="#17a2b8">按键·下</text>
+  <!-- 确认 D3 -->
+  <path class="w" d="M553 375 H440" stroke="#17a2b8"/>
+  <path class="w" d="M380 375 H330" stroke="#444"/>
+  <circle cx="440" cy="375" r="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+  <circle cx="380" cy="375" r="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+  <path d="M376 365 H444 M410 365 V355 M402 355 H418" stroke="#333" stroke-width="2" fill="none"/>
+  <use xlink:href="#gnd" href="#gnd" x="330" y="375"/>
+  <text x="440" y="393" text-anchor="middle" class="muted">NO</text>
+  <text x="380" y="393" text-anchor="middle" class="muted">C</text>
+  <text x="300" y="380" text-anchor="end" font-weight="bold" fill="#17a2b8">按键·确认</text>
+  <text x="300" y="398" text-anchor="end" class="muted">长按 3 秒 = 编辑模式</text>
+
+  <!-- D0 → VBAT_ADC 网络标签 -->
+  <path class="w" d="M553 240 H470" stroke="#0a8f6a"/>
+  <path d="M470 228 H340 L326 240 L340 252 H470 Z" fill="#e6f5ef" stroke="#0a8f6a" stroke-width="1.5"/>
+  <text x="400" y="245" text-anchor="middle" class="lbl" fill="#0a7a5a" font-weight="bold">VBAT_ADC（见左下）</text>
+
+  <!-- ========== 电池与电量检测 ========== -->
+  <rect x="40" y="830" width="730" height="280" rx="10" fill="#fafafa" stroke="#ddd"/>
+  <text x="60" y="858" font-weight="bold" fill="#222">电池 &amp; 电量检测（焊到 XIAO 背面的 BAT+ / BAT− 焊盘）</text>
+
+  <!-- 电池 -->
+  <path d="M90 930 H130 M100 942 H120" stroke="#333" stroke-width="3" fill="none"/>
+  <text x="80" y="926" font-weight="bold" fill="#d33">+</text>
+  <text x="82" y="958" font-weight="bold" fill="#444">−</text>
+  <text x="128" y="990" font-size="12" fill="#333">锂电池 3.7V</text>
+  <text x="128" y="1007" font-size="12" fill="#333">1000–1200mAh</text>
+  <text x="128" y="1024" font-size="12" fill="#333">带保护板</text>
+
+  <!-- 正极 → 开关 → BAT+ -->
+  <path class="w" d="M110 930 V910 H190" stroke="#d33"/>
+  <circle cx="190" cy="910" r="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+  <circle cx="250" cy="910" r="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+  <path d="M193 908 L244 892" stroke="#333" stroke-width="2.5"/>
+  <text x="220" y="935" text-anchor="middle" class="muted">电源开关</text>
+  <path class="w" d="M253 910 H600" stroke="#d33"/>
+  <path d="M600 898 H750 L764 910 L750 922 H600 Z" fill="#fdecec" stroke="#d33" stroke-width="1.5"/>
+  <text x="680" y="915" text-anchor="middle" class="lbl" fill="#c22" font-weight="bold">BAT+ 焊盘（背面）</text>
+
+  <!-- 负极 → BAT- -->
+  <path class="w" d="M110 942 V1080 H600" stroke="#444"/>
+  <path d="M600 1068 H750 L764 1080 L750 1092 H600 Z" fill="#eee" stroke="#444" stroke-width="1.5"/>
+  <text x="680" y="1085" text-anchor="middle" class="lbl" fill="#333" font-weight="bold">BAT− 焊盘（背面）</text>
+
+  <!-- 分压：BAT+ — R1 — 中点 — R2 — BAT-；中点并 100nF 到地 -->
+  <circle class="dot" cx="360" cy="910" r="4.5"/>
+  <path class="w" d="M360 910 V925" stroke="#d33"/>
+  <rect x="352" y="925" width="16" height="40" fill="#fff" stroke="#333" stroke-width="2"/>
+  <text x="378" y="950" font-size="12" fill="#333">R1 1MΩ</text>
+  <path class="w" d="M360 965 V1000" stroke="#0a8f6a"/>
+  <circle class="dot" cx="360" cy="985" r="4.5"/>
+  <rect x="352" y="1000" width="16" height="40" fill="#fff" stroke="#333" stroke-width="2"/>
+  <text x="378" y="1025" font-size="12" fill="#333">R2 1MΩ</text>
+  <path class="w" d="M360 1040 V1080" stroke="#444"/>
+  <circle class="dot" cx="360" cy="1080" r="4.5"/>
+
+  <path class="w" d="M360 985 H600" stroke="#0a8f6a"/>
+  <circle class="dot" cx="470" cy="985" r="4.5"/>
+  <path class="w" d="M470 985 V1020" stroke="#0a8f6a"/>
+  <path d="M455 1020 H485 M455 1030 H485" stroke="#333" stroke-width="3"/>
+  <path class="w" d="M470 1030 V1080" stroke="#444"/>
+  <circle class="dot" cx="470" cy="1080" r="4.5"/>
+  <text x="492" y="1030" font-size="12" fill="#333">100nF</text>
+  <path d="M600 973 H750 L764 985 L750 997 H600 Z" fill="#e6f5ef" stroke="#0a8f6a" stroke-width="1.5"/>
+  <text x="680" y="990" text-anchor="middle" class="lbl" fill="#0a7a5a" font-weight="bold">VBAT_ADC → D0</text>
+
+  <!-- ========== 接线要点 ========== -->
+  <rect x="800" y="830" width="580" height="280" rx="10" fill="#fffbea" stroke="#e6d9a2"/>
+  <text x="820" y="858" font-weight="bold" fill="#222">接线要点</text>
+  <g font-size="13" fill="#333">
+    <text x="820" y="886">1. 所有 GND 接在一起（XIAO 的 GND 脚 = 背面 BAT−）。</text>
+    <text x="820" y="910">2. 3V3 只给转接板 VCC；5V 脚和 D6 都不接。</text>
+    <text x="820" y="934">3. 按键只用 C 和 NO 两个脚，NC 空着；不用外接电阻（固件开了内部上拉）。</text>
+    <text x="820" y="958">4. 转接板按丝印名字接线，不按排针位置；RESE 拨码第一次上电前确认好。</text>
+    <text x="820" y="982">5. 分压：两个 1MΩ 串联，中点接 D0，固件按 ×2 换算电池电压。</text>
+    <text x="820" y="1006">6. 开关串在电池正极：关掉后分压电阻也不耗电。</text>
+    <text x="820" y="1030">7. XIAO 的外接天线记得插上，否则 WiFi 信号很差。</text>
+  </g>
+</svg>

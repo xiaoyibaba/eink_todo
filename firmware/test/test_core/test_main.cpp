@@ -78,7 +78,6 @@ class TestPlatform : public Platform {
   bool keys[3] = {false, false, false};
   int64_t sleptUntil = -1;
   bool wifiOk = true;
-  int beeps = 0;
   HttpHandler handler;
   TestFs fsImpl;
   EpdEmu epdImpl;
@@ -88,7 +87,6 @@ class TestPlatform : public Platform {
   int64_t nowUtc() override { return utc; }
   bool syncTime() override { return utc != 0; }
   bool keyDown(Key k) override { return keys[int(k) - 1]; }
-  void beep(const Note*, size_t) override { beeps++; }
   int batteryPercent() override { return 80; }
   NetMode startNetwork(std::string& url) override {
     url = wifiOk ? "http://192.168.1.50" : "http://192.168.4.1";

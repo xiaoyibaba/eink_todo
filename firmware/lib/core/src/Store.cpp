@@ -49,7 +49,6 @@ bool Store::load(Model& m) {
   JsonDocument doc;
   if (readJson(fs_, path::SETTINGS, doc)) {
     m.settings.resetHour = doc["resetHour"] | 4;
-    m.settings.buzzer = doc["buzzer"] | true;
     m.settings.tzMin = doc["tzMin"] | 480;
   }
   bool known = false;
@@ -99,7 +98,6 @@ bool Store::load(Model& m) {
 void Store::saveSettings(const Model& m) {
   JsonDocument doc;
   doc["resetHour"] = m.settings.resetHour;
-  doc["buzzer"] = m.settings.buzzer;
   doc["tzMin"] = m.settings.tzMin;
   writeJson(fs_, path::SETTINGS, doc);
 }

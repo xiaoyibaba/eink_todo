@@ -52,11 +52,6 @@ class Epd {
 enum class Key : uint8_t { None, Up, Down, Ok };
 enum class WakeReason : uint8_t { PowerOn, Key, Timer };
 
-struct Note {
-  uint16_t freq;  // 0 = 休止
-  uint16_t ms;
-};
-
 struct HttpRequest {
   std::string method, path, body;
   std::map<std::string, std::string> query;
@@ -85,7 +80,6 @@ class Platform {
   virtual int64_t nowUtc() = 0;  // 未校时返回 0
   virtual bool syncTime() = 0;   // 联网校时，有超时，会阻塞几秒
   virtual bool keyDown(Key k) = 0;
-  virtual void beep(const Note* notes, size_t n) = 0;
   virtual int batteryPercent() = 0;  // 未知返回 -1
   // 联网供家长编辑：连上家里 WiFi 返回 Station；没配置或连不上则开热点返回 SetupAp
   virtual NetMode startNetwork(std::string& url) = 0;

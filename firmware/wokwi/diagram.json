@@ -14,7 +14,6 @@
     { "type": "wokwi-pushbutton", "id": "btnUp", "top": 520, "left": 420, "attrs": { "color": "black", "label": "上", "key": "ArrowUp" } },
     { "type": "wokwi-pushbutton", "id": "btnDown", "top": 520, "left": 520, "attrs": { "color": "black", "label": "下", "key": "ArrowDown" } },
     { "type": "wokwi-pushbutton", "id": "btnOk", "top": 520, "left": 620, "attrs": { "color": "red", "label": "确认", "key": " " } },
-    { "type": "wokwi-buzzer", "id": "buzzer", "top": 600, "left": 740, "attrs": { "volume": "0.2" } },
     { "type": "wokwi-potentiometer", "id": "battery", "top": 620, "left": -80, "attrs": { "value": "600" } }
   ],
   "connections": [
@@ -32,8 +31,6 @@
     ["btnDown:2.l", "xiao:GND", "black", []],
     ["xiao:D3", "btnOk:1.l", "green", []],
     ["btnOk:2.l", "xiao:GND", "black", []],
-    ["xiao:D6", "buzzer:2", "red", []],
-    ["buzzer:1", "xiao:GND", "black", []],
     ["battery:SIG", "xiao:D0", "gold", []],
     ["battery:VCC", "xiao:3V3", "red", []],
     ["battery:GND", "xiao:GND", "black", []]

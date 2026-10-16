@@ -11,10 +11,6 @@ namespace et {
 
 namespace {
 
-const Note TICK[] = {{1568, 40}};
-const Note UNTICK[] = {{784, 40}};
-const Note FANFARE[] = {{523, 120}, {659, 120}, {784, 120}, {1047, 320}};
-
 const Key KEYS[3] = {Key::Up, Key::Down, Key::Ok};
 
 HttpResponse json(const JsonDocument& doc, int status = 200) {
@@ -224,13 +220,11 @@ void App::onShortRelease(Key k) {
   const bool finished = m_.toggle(idx);
   saveDay();
   if (finished) {
-    if (m_.settings.buzzer) p_.beep(FANFARE, 4);
     ui_.view = View::Celebrate;
     celebrateUntil_ = p_.millis() + CELEBRATE_MS;
     render(true);
     return;
   }
-  if (m_.settings.buzzer) p_.beep(m_.today.items[idx].done ? TICK : UNTICK, 1);
   render();
 }
 
@@ -367,7 +361,6 @@ HttpResponse App::apiState() {
     o["t"] = h.total;
   }
   doc["settings"]["resetHour"] = m_.settings.resetHour;
-  doc["settings"]["buzzer"] = m_.settings.buzzer;
   doc["battery"] = ui_.battery;
   JsonArray icons = doc["icons"].to<JsonArray>();
   for (auto& i : taskIcons()) {
@@ -480,7 +473,6 @@ HttpResponse App::apiSettings(const HttpRequest& req) {
   int h = body["resetHour"] | m_.settings.resetHour;
   if (h < 0 || h > 23) return error(400, "换日时间要在 0–23 点之间");
   m_.settings.resetHour = h;
-  m_.settings.buzzer = body["buzzer"] | m_.settings.buzzer;
   store_.saveSettings(m_);
   return apiState();
 }

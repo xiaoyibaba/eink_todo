@@ -27,9 +27,7 @@ constexpr int KEY_DOWN = 3;  // D2
 constexpr int KEY_OK = 4;    // D3
 constexpr int EPD_BUSY = 5;  // D4
 constexpr int EPD_RST = 6;   // D5
-// D6 是 UART0 TX：开机时 ROM 会往上打日志，不能接屏幕的 DC（Wokwi 里 DC 会一直是高电平，真机开机时也会乱跳），
-// 改接蜂鸣器，最坏只是开机时轻响一下
-constexpr int BUZZER = 43;   // D6
+// D6（GPIO43）空着：它是 UART0 TX，开机时 ROM 会往上打日志，不能接屏幕的 DC（Wokwi 里 DC 会一直是高电平）
 constexpr int EPD_CS = 44;   // D7
 constexpr int EPD_SCK = 7;   // D8
 constexpr int EPD_DC = 8;    // D9
@@ -120,19 +118,6 @@ class GxEpd : public Epd {
 
 // ------------------------------------------------------------------ 平台
 
-struct BeepJob {
-  std::vector<Note> notes;
-};
-
-void beepTask(void* arg) {
-  std::unique_ptr<BeepJob> job(static_cast<BeepJob*>(arg));
-  for (auto& n : job->notes) {
-    if (n.freq) tone(pins::BUZZER, n.freq);
-    delay(n.ms);
-    noTone(pins::BUZZER);
-  }
-  vTaskDelete(nullptr);
-}
 
 class EspPlatform : public Platform {
  public:
@@ -168,10 +153,6 @@ class EspPlatform : public Platform {
     bool latched = g_latched[i];
     g_latched[i] = false;
     return level || latched;
-  }
-  void beep(const Note* notes, size_t n) override {
-    auto* job = new BeepJob{std::vector<Note>(notes, notes + n)};
-    if (xTaskCreate(beepTask, "beep", 2048, job, 1, nullptr) != pdPASS) delete job;
   }
   int batteryPercent() override {
     // 1:1 分压：引脚电压 × 2 = 电池电压。锂电粗略曲线
@@ -319,8 +300,6 @@ void setup() {
   pinMode(pins::KEY_UP, INPUT_PULLUP);
   pinMode(pins::KEY_DOWN, INPUT_PULLUP);
   pinMode(pins::KEY_OK, INPUT_PULLUP);
-  pinMode(pins::BUZZER, OUTPUT);
-  digitalWrite(pins::BUZZER, LOW);
   for (int pin : {pins::KEY_UP, pins::KEY_DOWN, pins::KEY_OK}) rtc_gpio_deinit(static_cast<gpio_num_t>(pin));
   setenv("TZ", "UTC0", 1);  // 时区由 core 自己按设置换算
   tzset();

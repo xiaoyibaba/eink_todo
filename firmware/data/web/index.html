@@ -177,7 +177,6 @@
       <select id="resetHour"></select>
     </label>
     <p class="hint">到这个时间，屏幕换成新一天的任务，并结算前一天的星星。</p>
-    <label class="switch"><input type="checkbox" id="buzzer"> 打勾和完成时响一声</label>
     <div class="actions"><button class="primary" id="settingsSave">保存设置</button></div>
     <h2>家里的 WiFi</h2>
     <form id="wifiForm">
@@ -398,7 +397,7 @@ $('#starMinus').onclick = () => adjust(-1);
 for (let h = 0; h < 24; h++) $('#resetHour').insertAdjacentHTML('beforeend', `<option value="${h}">${h < 6 ? '凌晨 ' : ''}${h}:00</option>`);
 $('#settingsSave').onclick = async () => {
   try {
-    S = await api('PUT', '/api/settings', { resetHour: +$('#resetHour').value, buzzer: $('#buzzer').checked });
+    S = await api('PUT', '/api/settings', { resetHour: +$('#resetHour').value });
     say('设置已保存', true);
   } catch (e) { say(e.message); }
 };
@@ -428,7 +427,6 @@ function show(tab) {
   } else {
     $('#p-settings').hidden = false;
     $('#resetHour').value = S.settings.resetHour;
-    $('#buzzer').checked = S.settings.buzzer;
   }
 }
 $('#tabs').onclick = (e) => {
