@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>界面草图</title>
+<style>
+  /* 墨水屏只有纯黑纯白：草图里也只用 #000 / #fff */
+  :root { --ink: #000; --paper: #fff; }
+  body { margin: 0; padding: 24px 16px; background: #d9d6cf; font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif; color: #222; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  p.note { margin: 0 0 24px; font-size: 13px; color: #555; }
+  h2 { font-size: 14px; font-weight: 600; margin: 28px 0 8px; color: #333; }
+  .frame { display: inline-block; padding: 28px; background: #8a6a4a; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,.25); max-width: 100%; box-sizing: border-box; overflow-x: auto; }
+  .mat { padding: 14px; background: #f3efe6; }
+  .screen { position: relative; width: 800px; height: 480px; background: var(--paper); color: var(--ink); overflow: hidden; font-weight: 700; }
+  .keys { display: flex; gap: 28px; justify-content: center; margin-top: 10px; font-size: 12px; color: #f3efe6; }
+  .keys span::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #222; border: 2px solid #ccc; vertical-align: -3px; margin-right: 6px; }
+
+  /* 主界面 */
+  .hdr { position: absolute; left: 0; right: 0; top: 0; height: 64px; border-bottom: 3px solid var(--ink); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-sizing: border-box; }
+  .hdr .date { font-size: 30px; }
+  .bat { display: flex; align-items: center; gap: 2px; }
+  .bat i { display: block; width: 44px; height: 20px; border: 3px solid var(--ink); box-sizing: border-box; padding: 2px; }
+  .bat i b { display: block; height: 100%; width: 70%; background: var(--ink); }
+  .bat u { display: block; width: 4px; height: 8px; background: var(--ink); }
+  .list { position: absolute; left: 0; top: 67px; width: 528px; bottom: 40px; border-right: 3px solid var(--ink); padding: 6px 0; box-sizing: border-box; }
+  .row { height: 60px; display: flex; align-items: center; gap: 14px; padding: 0 20px; font-size: 34px; }
+  .row .cb { width: 34px; height: 34px; border: 4px solid currentColor; box-sizing: border-box; flex: none; position: relative; }
+  .row.done .cb::after { content: ""; position: absolute; left: 6px; top: -2px; width: 10px; height: 20px; border: solid currentColor; border-width: 0 5px 5px 0; transform: rotate(45deg); }
+  .row svg { width: 40px; height: 40px; flex: none; }
+  .row.done .t { text-decoration: line-through; text-decoration-thickness: 3px; }
+  .row.cur { background: var(--ink); color: var(--paper); }
+  .side { position: absolute; left: 531px; right: 0; top: 67px; bottom: 40px; padding: 18px 22px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; }
+  .side .lbl { font-size: 22px; }
+  .bar { height: 26px; border: 3px solid var(--ink); display: flex; }
+  .bar i { flex: 1; border-right: 3px solid var(--ink); }
+  .bar i:last-child { border-right: 0; }
+  .bar i.on { background: var(--ink); }
+  .big { font-size: 46px; line-height: 1; display: flex; align-items: center; gap: 10px; }
+  .big svg { width: 44px; height: 44px; }
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 18px; gap: 2px; }
+  .week svg { width: 26px; height: 26px; }
+  .ftr { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; border-top: 3px solid var(--ink); display: flex; align-items: center; justify-content: center; gap: 36px; font-size: 20px; }
+
+  /* 庆祝页 / 编辑页 */
+  .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; }
+  .center .h { font-size: 52px; }
+  .center .s { font-size: 30px; }
+  .edit { position: absolute; inset: 0; display: flex; align-items: center; gap: 40px; padding: 0 56px; }
+  .qr { width: 260px; height: 260px; flex: none; border: 4px solid var(--ink); box-sizing: border-box; display: grid; grid-template-columns: repeat(21, 1fr); padding: 10px; }
+  .qr i.k { background: var(--ink); }
+  .edit .txt { display: flex; flex-direction: column; gap: 18px; font-size: 26px; }
+  .edit .txt .h { font-size: 42px; }
+  .edit .mono { font-family: Menlo, monospace; font-size: 30px; }
+  .edit .small { font-size: 20px; font-weight: 400; }
+</style>
+</head>
+<body>
+<h1>eink-todo 界面草图</h1>
+<p class="note">7.5" 黑白 800×480 原尺寸，只用纯黑纯白。图标和字体是示意，实物用预置 1-bit 图标和 GB2312 点阵字库。</p>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="star" viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z" fill="currentColor"/></symbol>
+    <symbol id="star-o" viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-calc" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4"><rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M7.5 7h9M8 12h2m4 0h2M8 16.5h2m4 0h2"/></g></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M12 6c-2-1.6-5-2-8-1.5v14c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-14c-3-.5-6-.1-8 1.5z"/><path d="M12 6v14"/></g></symbol>
+    <symbol id="i-ear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="7" rx="1"/><rect x="17" y="14" width="4" height="7" rx="1"/></g></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M4 20l1.2-4.8L16 4.4l3.6 3.6L8.8 18.8z"/><path d="M13.5 7l3.6 3.6"/></g></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="2"/><path d="M9 7V5a3 3 0 0 1 6 0v2M4 12h16"/></g></symbol>
+  </defs>
+</svg>
+
+<h2>① 主界面：光标在「英语听读」上（反色），已完成 2/5</h2>
+<div class="frame"><div class="mat"><div class="screen">
+  <div class="hdr"><span class="date">10月16日 星期五</span><span class="bat"><i><b></b></i><u></u></span></div>
+  <div class="list">
+    <div class="row done"><span class="cb"></span><svg><use href="#i-calc"/></svg><span class="t">口算 20 题</span></div>
+    <div class="row done"><span class="cb"></span><svg><use href="#i-book"/></svg><span class="t">语文阅读</span></div>
+    <div class="row cur"><span class="cb"></span><svg><use href="#i-ear"/></svg><span class="t">英语听读</span></div>
+    <div class="row"><span class="cb"></span><svg><use href="#i-pen"/></svg><span class="t">练字一页</span></div>
+    <div class="row"><span class="cb"></span><svg><use href="#i-bag"/></svg><span class="t">整理书包</span></div>
+  </div>
+  <div class="side">
+    <div class="lbl">今天完成 2 / 5</div>
+    <div class="bar"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+    <div class="big"><svg><use href="#star"/></svg>37</div>
+    <div class="lbl">连续 5 天</div>
+    <div class="lbl" style="margin-top:6px">本周</div>
+    <div class="week">
+      <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+      <svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star-o"/></svg><span></span><span></span>
+    </div>
+  </div>
+  <div class="ftr"><span>▲▼ 选择</span><span>● 打勾</span><span>长按 ● 家长设置</span></div>
+</div></div><div class="keys"><span>上</span><span>下</span><span>确认</span></div></div>
+
+<h2>② 全部完成：全屏刷新 + 蜂鸣器旋律，几秒后回到主界面</h2>
+<div class="frame"><div class="mat"><div class="screen">
+  <div class="center">
+    <svg width="150" height="150"><use href="#star"/></svg>
+    <div class="h">今天的任务全部完成！</div>
+    <div class="s">连续 6 天 · 一共 38 颗星</div>
+  </div>
+</div></div></div>
+
+<h2>③ 家长编辑模式：长按确认 3 秒进入，10 分钟无操作自动退出</h2>
+<div class="frame"><div class="mat"><div class="screen">
+  <div class="edit">
+    <div class="qr" id="qr"></div>
+    <div class="txt">
+      <div class="h">家长设置</div>
+      <div>手机连家里 WiFi，扫码<br>或在浏览器打开：</div>
+      <div class="mono">todo.local<br>192.168.1.57</div>
+      <div class="small">10 分钟没有操作会自动退出</div>
+    </div>
+  </div>
+</div></div></div>
+
+<script>
+  // 二维码只是示意图案，不能扫
+  (function () {
+    var n = 21, q = document.getElementById('qr'), html = '';
+    function finder(r, c) {
+      for (var [y, x] of [[0, 0], [0, 14], [14, 0]]) {
+        var dy = r - y, dx = c - x;
+        if (dy >= 0 && dy < 7 && dx >= 0 && dx < 7)
+          return (dy === 0 || dy === 6 || dx === 0 || dx === 6 || (dy >= 2 && dy <= 4 && dx >= 2 && dx <= 4)) ? 1 : 0;
+      }
+      return -1;
+    }
+    var s = 7;
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) {
+      var f = finder(r, c), on;
+      if (f >= 0) on = f; else { s = (s * 1103515245 + 12345) & 0x7fffffff; on = (s >> 16) & 1; }
+      html += '<i' + (on ? ' class="k"' : '') + '></i>';
+    }
+    q.innerHTML = html;
+  })();
+</script>
+</body>
+</html>

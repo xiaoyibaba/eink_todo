@@ -1,0 +1,13 @@
+[wokwi]
+version = 1
+firmware = '../.pio/build/wokwi/merged.bin'
+elf = '../.pio/build/wokwi/firmware.elf'
+
+[[chip]]
+name = 'uc8179'
+binary = 'chip/uc8179.chip.wasm'
+
+# 电脑浏览器打开 http://localhost:8180 = 仿真设备上的家长网页（需先长按确认键进入编辑模式）
+[[net.forward]]
+from = 'localhost:8180'
+to = 'target:80'

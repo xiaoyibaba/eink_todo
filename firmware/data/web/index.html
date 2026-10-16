@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>任务屏设置</title>
+<style>
+  /* 设备内置页面：局域网/热点下没有外网，不引用任何 CDN 和网络字体 */
+  :root {
+    --desk: #D9D6CF; --paper: #ECEDE8; --ink: #1B1D1F; --ink-2: #5A5D60;
+    --star: #E0A400; --err: #B4441C; --rule: 3px;
+    --font: -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --desk: #121314; --paper: #1E2022; --ink: #E7E8E4; --ink-2: #9A9C98; --star: #F2C230; --err: #E8794F; }
+    .px { filter: invert(1); }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--desk); color: var(--ink); font: 16px/1.5 var(--font); padding-bottom: env(safe-area-inset-bottom); }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--star); outline-offset: 2px; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 96px; }
+
+  header { position: sticky; top: 0; z-index: 5; background: var(--desk); padding: 14px 16px 0; }
+  .bar { max-width: 528px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .bar h1 { font-size: 20px; margin: 0; font-weight: 800; letter-spacing: .02em; white-space: nowrap; }
+  .bar .exit, .bar .date { white-space: nowrap; }
+  @media (max-width: 359px) { .bar .date { display: none; } }
+  .bar .date { font: 13px var(--mono); color: var(--ink-2); }
+  .bar .exit { margin-left: auto; background: var(--ink); color: var(--paper); border: 0; border-radius: 999px; padding: 8px 16px; font-weight: 700; }
+  nav { max-width: 528px; margin: 12px auto 0; display: flex; border-bottom: var(--rule) solid var(--ink); overflow-x: auto; scrollbar-width: none; }
+  nav button { flex: 1 0 auto; background: none; border: 0; padding: 8px 12px 10px; font-weight: 600; color: var(--ink-2); position: relative; }
+  nav button[aria-selected="true"] { color: var(--ink); }
+  nav button[aria-selected="true"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: -3px; height: 6px; background: var(--ink); }
+
+  .alert { margin: 14px 0 0; padding: 10px 12px; border-left: 4px solid var(--err); background: var(--paper); color: var(--err); font-weight: 600; }
+  .ok { border-left-color: var(--ink); color: var(--ink); }
+  .hint { color: var(--ink-2); font-size: 14px; margin: 10px 2px; }
+
+  /* —— 屏幕复刻：编辑的就是孩子看到的 —— */
+  .screen { margin-top: 16px; background: var(--paper); border: var(--rule) solid var(--ink); border-radius: 4px; box-shadow: 0 0 0 10px var(--paper), 0 0 0 13px var(--ink); margin-left: 13px; margin-right: 13px; }
+  @media (max-width: 400px) { .screen { margin-left: 0; margin-right: 0; box-shadow: none; } }
+  .screen-head { display: flex; align-items: baseline; justify-content: space-between; padding: 10px 14px; border-bottom: var(--rule) solid var(--ink); font-weight: 800; font-size: 18px; }
+  .screen-head small { font: 600 13px var(--mono); }
+  .rows { list-style: none; margin: 0; padding: 4px 0; }
+  .row { display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 12px; min-height: 56px; }
+  .row + .row { border-top: 1px dashed color-mix(in srgb, var(--ink) 25%, transparent); }
+  .cb { width: 22px; height: 22px; border: 3px solid var(--ink); flex: none; display: grid; place-items: center; }
+  .cb.on::after { content: ""; width: 6px; height: 11px; border: solid var(--ink); border-width: 0 3px 3px 0; transform: translateY(-2px) rotate(45deg); }
+  .iconbtn { flex: none; width: 44px; height: 44px; padding: 2px; border: 2px solid transparent; border-radius: 6px; background: none; }
+  .iconbtn:hover { border-color: var(--ink-2); }
+  .px { width: 40px; height: 40px; image-rendering: pixelated; display: block; }
+  .row input.t { flex: 1; min-width: 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: 19px; font-weight: 800; padding: 4px 2px; }
+  .row input.t:focus { outline: none; border-bottom-color: var(--ink); }
+  .row input.t::placeholder { color: var(--ink-2); font-weight: 500; }
+  .count { font: 12px var(--mono); color: var(--ink-2); width: 34px; text-align: right; flex: none; display: none; }
+  .row:focus-within .count, .count.over { display: block; }
+  .count.over { color: var(--err); font-weight: 700; }
+  .tools { display: flex; flex: none; }
+  .tools button { width: 28px; height: 40px; border: 0; background: none; font-size: 16px; color: var(--ink-2); border-radius: 6px; }
+  .tools button:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+  .tools button:disabled { opacity: .25; cursor: default; }
+  .add { display: flex; width: 100%; align-items: center; gap: 10px; padding: 12px 14px; border: 0; border-top: var(--rule) solid var(--ink); background: none; font-weight: 700; }
+  .add:disabled { color: var(--ink-2); }
+  .rest { padding: 36px 16px; text-align: center; font-size: 26px; font-weight: 800; }
+  .rest small { display: block; font-size: 15px; font-weight: 500; color: var(--ink-2); }
+
+  .actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; align-items: center; }
+  .primary { background: var(--ink); color: var(--paper); border: 0; border-radius: 8px; padding: 12px 22px; font-weight: 800; }
+  .primary:disabled { opacity: .35; cursor: default; }
+  .ghost { background: none; border: 2px solid var(--ink); border-radius: 8px; padding: 10px 16px; font-weight: 700; }
+  .switch { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-weight: 600; }
+  .switch input { width: 20px; height: 20px; accent-color: var(--ink); }
+
+  .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 16px; }
+  .days button { aspect-ratio: 1; border: 2px solid var(--ink); background: var(--paper); border-radius: 6px; font-weight: 800; font-size: 17px; position: relative; }
+  .days button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .days button .n { position: absolute; right: 3px; bottom: 1px; font: 10px var(--mono); opacity: .7; }
+
+  .stars { display: flex; align-items: center; gap: 14px; margin-top: 18px; background: var(--paper); border: var(--rule) solid var(--ink); border-radius: 4px; padding: 16px; }
+  .stars .big { font: 800 44px/1 var(--mono); }
+  .stars .big::before { content: "★"; color: var(--star); margin-right: 6px; }
+  .stars .meta { color: var(--ink-2); font-size: 14px; }
+  .stars .adj { margin-left: auto; display: flex; gap: 6px; }
+  .stars .adj button { width: 44px; height: 44px; border-radius: 8px; border: 2px solid var(--ink); background: none; font-weight: 800; font-size: 18px; }
+  .hist { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .hist li { aspect-ratio: 1; border-radius: 4px; display: grid; place-items: center; font: 11px var(--mono); background: var(--paper); border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); position: relative; }
+  .hist li.s1 { background: var(--ink); color: var(--paper); }
+  .hist li.s1::after { content: "★"; position: absolute; top: 1px; right: 3px; font-size: 10px; color: var(--star); }
+  .hist li.s0 { border: 2px solid var(--err); color: var(--err); }
+  .legend { display: flex; gap: 14px; font-size: 13px; color: var(--ink-2); margin-top: 10px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+
+  .field { display: grid; gap: 6px; margin-top: 18px; font-weight: 600; }
+  .field input, .field select { padding: 10px 12px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); font-weight: 500; }
+  h2 { font-size: 16px; margin: 28px 0 0; padding-bottom: 6px; border-bottom: var(--rule) solid var(--ink); }
+
+  dialog { border: var(--rule) solid var(--ink); border-radius: 12px 12px 0 0; background: var(--paper); color: var(--ink); padding: 16px; width: 100%; max-width: 560px; margin: auto auto 0; }
+  dialog::backdrop { background: rgb(0 0 0 / .45); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; margin-top: 10px; }
+  .grid button { border: 2px solid transparent; background: none; border-radius: 8px; padding: 6px 2px; display: grid; justify-items: center; gap: 2px; font-size: 13px; }
+  .grid button[aria-pressed="true"] { border-color: var(--ink); }
+  .done-page { text-align: center; padding: 80px 16px; }
+  .done-page b { display: block; font-size: 26px; }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: no-preference) { .row { transition: background .15s; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>任务屏设置</h1>
+    <span class="date" id="today"></span>
+    <button class="exit" id="exit">完成</button>
+  </div>
+  <nav role="tablist" id="tabs">
+    <button role="tab" data-tab="today" aria-selected="true">今天</button>
+    <button role="tab" data-tab="tomorrow" aria-selected="false">明天</button>
+    <button role="tab" data-tab="week" aria-selected="false">每周模板</button>
+    <button role="tab" data-tab="record" aria-selected="false">星星</button>
+    <button role="tab" data-tab="settings" aria-selected="false">设置</button>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div id="msg" class="alert" role="status" hidden></div>
+
+  <!-- 今天 / 明天：同一个编辑器 -->
+  <section id="p-day" hidden>
+    <div class="screen">
+      <div class="screen-head"><span id="dayTitle"></span><small id="daySource"></small></div>
+      <div id="dayRest" class="rest" hidden>今天休息<small>屏幕显示「好好玩吧！」，不影响连续天数</small></div>
+      <ul class="rows" id="dayRows"></ul>
+      <button class="add" id="dayAdd">＋ 加一条任务</button>
+    </div>
+    <label class="switch"><input type="checkbox" id="dayRestToggle"> 这天休息（不安排任务）</label>
+    <div class="actions">
+      <button class="primary" id="daySave" disabled>保存这一天</button>
+      <button class="ghost" id="dayRevert" hidden>恢复成每周模板</button>
+    </div>
+    <p class="hint" id="dayHint"></p>
+  </section>
+
+  <!-- 每周模板 -->
+  <section id="p-week" hidden>
+    <div class="days" id="weekDays"></div>
+    <div class="screen">
+      <div class="screen-head"><span id="weekTitle"></span><small>每周模板</small></div>
+      <ul class="rows" id="weekRows"></ul>
+      <button class="add" id="weekAdd">＋ 加一条任务</button>
+    </div>
+    <div class="actions">
+      <button class="primary" id="weekSave" disabled>保存模板</button>
+      <button class="ghost" id="weekCopy">复制到周一至周五</button>
+    </div>
+    <p class="hint">模板每天凌晨换日时生效。今天没有单独改过的话，保存后今天也会跟着变，已打的勾保留。</p>
+  </section>
+
+  <!-- 星星 -->
+  <section id="p-record" hidden>
+    <div class="stars">
+      <div><div class="big" id="starCount">0</div><div class="meta" id="streak"></div></div>
+      <div class="adj"><button id="starMinus" aria-label="减一颗星">−1</button><button id="starPlus" aria-label="加一颗星">＋1</button></div>
+    </div>
+    <p class="hint">当天的任务全部完成得一颗星。这里加减是家长手动奖励或纠错。</p>
+    <h2>最近 30 天</h2>
+    <ul class="hist" id="hist"></ul>
+    <div class="legend"><span><i style="background:var(--ink)"></i>全部完成</span><span><i style="border:2px solid var(--err)"></i>没做完</span><span><i style="background:var(--paper);border:1px solid var(--ink-2)"></i>休息 / 没任务</span></div>
+  </section>
+
+  <!-- 设置 -->
+  <section id="p-settings" hidden>
+    <label class="field">每天几点换日
+      <select id="resetHour"></select>
+    </label>
+    <p class="hint">到这个时间，屏幕换成新一天的任务，并结算前一天的星星。</p>
+    <label class="switch"><input type="checkbox" id="buzzer"> 打勾和完成时响一声</label>
+    <div class="actions"><button class="primary" id="settingsSave">保存设置</button></div>
+    <h2>家里的 WiFi</h2>
+    <form id="wifiForm">
+      <label class="field">WiFi 名称 <input id="ssid" autocomplete="off" required></label>
+      <label class="field">密码 <input id="pass" type="password" autocomplete="off"></label>
+      <div class="actions"><button class="primary" type="submit">保存并连接</button></div>
+      <p class="hint">只支持 2.4GHz WiFi。保存后设备会断开当前连接，改连新的 WiFi。</p>
+    </form>
+  </section>
+
+  <!-- 第一次配网（设备开热点时） -->
+  <section id="p-setup" hidden>
+    <h2>连接家里的 WiFi</h2>
+    <p class="hint">设备需要连上 WiFi 才能知道今天的日期，家长以后也通过 WiFi 来改任务。</p>
+    <form id="setupForm">
+      <label class="field">WiFi 名称 <input id="ssid2" autocomplete="off" required></label>
+      <label class="field">密码 <input id="pass2" type="password" autocomplete="off"></label>
+      <div class="actions"><button class="primary" type="submit">保存并连接</button></div>
+      <p class="hint">只支持 2.4GHz WiFi。连上后，屏幕会显示一个新的二维码，手机连回家里 WiFi 再扫它。</p>
+    </form>
+  </section>
+
+  <section id="p-bye" class="done-page" hidden>
+    <b>已退出设置</b>
+    <p class="hint">屏幕正在刷新。下次要改，长按设备上的确认键 3 秒。</p>
+  </section>
+</main>
+
+<dialog id="picker">
+  <strong>选一个图标</strong>
+  <div class="grid" id="pickerGrid"></div>
+</dialog>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const WEEK = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+let S = null;            // /api/state
+let limits = { maxItems: 8, maxChars: 10 };
+let icons = [];
+const day = { date: null, rest: false, items: [], custom: false, dirty: false };
+const week = { days: null, sel: 0, dirty: false };
+
+async function api(method, path, body) {
+  const r = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `请求失败（${r.status}）`);
+  return j;
+}
+function say(text, ok) {
+  const m = $('#msg');
+  m.textContent = text; m.className = 'alert' + (ok ? ' ok' : ''); m.hidden = !text;
+  if (ok) setTimeout(() => { if (m.textContent === text) m.hidden = true; }, 2500);
+}
+function fmtDate(iso) { const [, m, d] = iso.split('-').map(Number); return `${m}月${d}日`; }
+function len(s) { return [...s].length; }
+
+// —— 任务行编辑器（今天/明天/模板共用）
+function renderRows(ul, model, onChange) {
+  ul.innerHTML = '';
+  model.items.forEach((it, i) => {
+    const li = document.createElement('li');
+    li.className = 'row';
+    const n = len(it.text);
+    li.innerHTML = `
+      <span class="cb ${it.done ? 'on' : ''}" title="${it.done ? '孩子已勾选' : '未完成'}"></span>
+      <button class="iconbtn" aria-label="换图标"><img class="px" alt="" src="icons/${it.icon || 'star'}.png"></button>
+      <input class="t" maxlength="20" placeholder="写任务，比如：口算20题" aria-label="第 ${i + 1} 条任务">
+      <span class="count ${n > limits.maxChars ? 'over' : ''}">${n}/${limits.maxChars}</span>
+      <span class="tools">
+        <button aria-label="上移" ${i === 0 ? 'disabled' : ''}>↑</button>
+        <button aria-label="下移" ${i === model.items.length - 1 ? 'disabled' : ''}>↓</button>
+        <button aria-label="删除">✕</button>
+      </span>`;
+    const input = li.querySelector('input');
+    input.value = it.text;
+    input.addEventListener('input', () => {
+      it.text = input.value;
+      const c = li.querySelector('.count');
+      c.textContent = `${len(it.text)}/${limits.maxChars}`;
+      c.classList.toggle('over', len(it.text) > limits.maxChars);
+      onChange(false);
+    });
+    li.querySelector('.iconbtn').onclick = () => pickIcon(it.icon, (name) => { it.icon = name; onChange(true); });
+    const [up, down, del] = li.querySelectorAll('.tools button');
+    up.onclick = () => { [model.items[i - 1], model.items[i]] = [model.items[i], model.items[i - 1]]; onChange(true); };
+    down.onclick = () => { [model.items[i + 1], model.items[i]] = [model.items[i], model.items[i + 1]]; onChange(true); };
+    del.onclick = () => { model.items.splice(i, 1); onChange(true); };
+    ul.appendChild(li);
+  });
+}
+function addRow(model, ul, onChange) {
+  if (model.items.length >= limits.maxItems) return;
+  model.items.push({ text: '', icon: 'star' });
+  onChange(true);
+  ul.querySelector('li:last-child input')?.focus();
+}
+function invalid(items) {
+  return items.some((x) => !x.text.trim() || len(x.text.trim()) > limits.maxChars);
+}
+
+function pickIcon(current, done) {
+  const g = $('#pickerGrid');
+  g.innerHTML = '';
+  icons.forEach((ic) => {
+    const b = document.createElement('button');
+    b.setAttribute('aria-pressed', ic.name === current);
+    b.innerHTML = `<img class="px" alt="" src="icons/${ic.name}.png">${ic.label}`;
+    b.onclick = () => { $('#picker').close(); done(ic.name); };
+    g.appendChild(b);
+  });
+  $('#picker').showModal();
+}
+$('#picker').addEventListener('click', (e) => { if (e.target.id === 'picker') e.target.close(); });
+
+// —— 今天 / 明天
+async function loadDay(date) {
+  const d = await api('GET', `/api/day?date=${date}`);
+  Object.assign(day, { date, rest: d.rest, items: d.items, custom: d.custom, isToday: d.isToday, weekday: d.weekday, dirty: false });
+  drawDay();
+}
+function drawDay() {
+  $('#dayTitle').textContent = `${fmtDate(day.date)} ${WEEK[day.weekday]}`;
+  $('#daySource').textContent = day.custom ? '单独设置' : '来自每周模板';
+  $('#dayRest').hidden = !day.rest;
+  $('#dayRows').hidden = day.rest;
+  $('#dayAdd').hidden = day.rest;
+  $('#dayRestToggle').checked = day.rest;
+  $('#dayRevert').hidden = !day.custom;
+  $('#dayAdd').disabled = day.items.length >= limits.maxItems;
+  $('#dayAdd').textContent = day.items.length >= limits.maxItems ? `最多 ${limits.maxItems} 条` : '＋ 加一条任务';
+  renderRows($('#dayRows'), day, (redraw) => { day.dirty = true; if (redraw) drawDay(); else syncDaySave(); });
+  syncDaySave();
+  $('#dayHint').textContent = day.isToday
+    ? '只改这一天，不影响每周模板。已打的勾会保留，退出设置后屏幕更新。'
+    : '只改这一天，不影响每周模板。';
+}
+function syncDaySave() { $('#daySave').disabled = !day.dirty || (!day.rest && invalid(day.items)); }
+$('#dayAdd').onclick = () => addRow(day, $('#dayRows'), () => { day.dirty = true; drawDay(); });
+$('#dayRestToggle').onchange = (e) => { day.rest = e.target.checked; day.dirty = true; drawDay(); };
+$('#daySave').onclick = async () => {
+  try {
+    const items = day.rest ? [] : day.items.map(({ id, text, icon }) => ({ id, text: text.trim(), icon }));
+    await api('PUT', `/api/day?date=${day.date}`, { rest: day.rest, items });
+    await loadDay(day.date);
+    say('已保存这一天', true);
+  } catch (e) { say(e.message); }
+};
+$('#dayRevert').onclick = async () => {
+  try { await api('DELETE', `/api/day?date=${day.date}`); await loadDay(day.date); say('已恢复成每周模板', true); }
+  catch (e) { say(e.message); }
+};
+
+// —— 每周模板
+async function loadWeek() {
+  const t = await api('GET', '/api/templates');
+  week.days = t.days; week.dirty = false;
+  drawWeek();
+}
+function drawWeek() {
+  const box = $('#weekDays');
+  box.innerHTML = '';
+  WEEK.forEach((w, i) => {
+    const b = document.createElement('button');
+    b.setAttribute('aria-pressed', i === week.sel);
+    b.innerHTML = `${w.slice(1)}<span class="n">${week.days[i].length}</span>`;
+    b.setAttribute('aria-label', `${w}，${week.days[i].length} 条`);
+    b.onclick = () => { week.sel = i; drawWeek(); };
+    box.appendChild(b);
+  });
+  const cur = { items: week.days[week.sel] };
+  $('#weekTitle').textContent = WEEK[week.sel];
+  renderRows($('#weekRows'), cur, (redraw) => { week.dirty = true; if (redraw) drawWeek(); else syncWeekSave(); });
+  $('#weekAdd').disabled = cur.items.length >= limits.maxItems;
+  $('#weekAdd').onclick = () => addRow(cur, $('#weekRows'), () => { week.dirty = true; drawWeek(); });
+  $('#weekCopy').textContent = week.sel < 5 ? `把${WEEK[week.sel]}复制到周一至周五` : `把${WEEK[week.sel]}复制到周末`;
+  syncWeekSave();
+}
+function syncWeekSave() { $('#weekSave').disabled = !week.dirty || week.days.some(invalid); }
+$('#weekCopy').onclick = () => {
+  const src = week.days[week.sel];
+  const targets = week.sel < 5 ? [0, 1, 2, 3, 4] : [5, 6];
+  targets.forEach((d) => { if (d !== week.sel) week.days[d] = src.map(({ text, icon }) => ({ text, icon })); });
+  week.dirty = true; drawWeek();
+  say('已复制，记得点「保存模板」', true);
+};
+$('#weekSave').onclick = async () => {
+  try {
+    const days = week.days.map((d) => d.map(({ id, text, icon }) => ({ id, text: text.trim(), icon })));
+    const t = await api('PUT', '/api/templates', { days });
+    week.days = t.days; week.dirty = false; drawWeek();
+    say('模板已保存', true);
+  } catch (e) { say(e.message); }
+};
+
+// —— 星星
+function drawRecord() {
+  $('#starCount').textContent = S.stars;
+  $('#streak').textContent = `连续 ${S.streak} 天全部完成`;
+  const ul = $('#hist');
+  ul.innerHTML = '';
+  S.history.slice(-28).forEach((h) => {
+    const li = document.createElement('li');
+    li.className = 's' + h.s;
+    const [, m, d] = h.date.split('-').map(Number);
+    li.textContent = d;
+    li.title = `${m}月${d}日：` + (h.s === 1 ? '全部完成' : h.s === 0 ? `完成 ${h.d}/${h.t}` : '休息');
+    ul.appendChild(li);
+  });
+  if (!S.history.length) ul.outerHTML = '<p class="hint" id="hist">还没有记录。过完第一天就有了。</p>';
+}
+async function adjust(delta) {
+  try { S = await api('POST', '/api/stars', { delta }); drawRecord(); } catch (e) { say(e.message); }
+}
+$('#starPlus').onclick = () => adjust(1);
+$('#starMinus').onclick = () => adjust(-1);
+
+// —— 设置
+for (let h = 0; h < 24; h++) $('#resetHour').insertAdjacentHTML('beforeend', `<option value="${h}">${h < 6 ? '凌晨 ' : ''}${h}:00</option>`);
+$('#settingsSave').onclick = async () => {
+  try {
+    S = await api('PUT', '/api/settings', { resetHour: +$('#resetHour').value, buzzer: $('#buzzer').checked });
+    say('设置已保存', true);
+  } catch (e) { say(e.message); }
+};
+async function saveWifi(ssid, pass) {
+  try {
+    await api('POST', '/api/wifi', { ssid, pass });
+    say('已保存。设备正在连接 WiFi，请看屏幕上的提示。', true);
+  } catch (e) { say(e.message); }
+}
+$('#wifiForm').onsubmit = (e) => { e.preventDefault(); saveWifi($('#ssid').value.trim(), $('#pass').value); };
+$('#setupForm').onsubmit = (e) => { e.preventDefault(); saveWifi($('#ssid2').value.trim(), $('#pass2').value); };
+
+// —— 页面切换
+function show(tab) {
+  document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === tab));
+  ['p-day', 'p-week', 'p-record', 'p-settings'].forEach((id) => ($('#' + id).hidden = true));
+  say('');
+  if (tab === 'today' || tab === 'tomorrow') {
+    $('#p-day').hidden = false;
+    loadDay(tab === 'today' ? S.today.date : S.tomorrow).catch((e) => say(e.message));
+  } else if (tab === 'week') {
+    $('#p-week').hidden = false;
+    loadWeek().catch((e) => say(e.message));
+  } else if (tab === 'record') {
+    $('#p-record').hidden = false;
+    drawRecord();
+  } else {
+    $('#p-settings').hidden = false;
+    $('#resetHour').value = S.settings.resetHour;
+    $('#buzzer').checked = S.settings.buzzer;
+  }
+}
+$('#tabs').onclick = (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if ((day.dirty || week.dirty) && !confirm('有改动还没保存，确定离开？')) return;
+  day.dirty = week.dirty = false;
+  show(b.dataset.tab);
+};
+$('#exit').onclick = async () => {
+  if ((day.dirty || week.dirty) && !confirm('有改动还没保存，确定退出？')) return;
+  try { await api('POST', '/api/exit'); } catch (e) { /* 设备已经退出也算成功 */ }
+  document.querySelectorAll('header, main > section').forEach((el) => (el.hidden = true));
+  $('#p-bye').hidden = false;
+};
+
+(async function init() {
+  try {
+    S = await api('GET', '/api/state');
+  } catch (e) {
+    say(e.message + '。长按设备上的确认键 3 秒，屏幕出现二维码后再刷新本页。');
+    return;
+  }
+  limits = S.limits; icons = S.icons;
+  if (S.mode === 'setup' || !S.timeKnown) {
+    $('#tabs').hidden = true; $('#exit').hidden = S.mode === 'setup';
+    $('#p-setup').hidden = false;
+    return;
+  }
+  $('#today').textContent = `${fmtDate(S.today.date)} ${WEEK[S.today.weekday]}`;
+  const tab = location.hash.slice(1);  // 支持 #week 这样直接打开某一页
+  show(['today', 'tomorrow', 'week', 'record', 'settings'].includes(tab) ? tab : 'today');
+})();
+</script>
+</body>
+</html>

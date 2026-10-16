@@ -16,3 +16,11 @@ __pycache__/
 
 # Secrets
 firmware/include/secrets.h
+
+# 素材生成用的字体源（体积大，脚本会自动下载）
+tools/.cache/
+
+# 模拟器运行状态和截图、Wokwi 产物
+firmware/.sim/
+firmware/wokwi/shots/
+firmware/wokwi/chip/*.wasm

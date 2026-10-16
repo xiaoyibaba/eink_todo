@@ -1,0 +1,140 @@
+# 模拟器脚本：从周五放学跑到下周一，覆盖需求里的主要流程。
+# 运行（在 firmware/ 下）：.pio/build/sim/program --script test/sim/full_week.txt --out .sim/shots --start "2026-10-16 17:30"
+# 每个 expect 失败都会让程序以非 0 退出。
+
+# --- 周五放学，第一次开机（默认模板 5 条）
+shot 01_poweron
+expect view Main
+key ok
+key down
+key ok
+shot 02_two_done
+expect done 2
+expect panel
+
+# --- 30 秒没操作 → 深睡；按键唤醒只亮光标，不勾选
+wait 31
+expect sleeping
+shot 03_asleep
+key ok
+expect awake
+expect done 2
+shot 04_woken
+expect panel
+
+# --- 勾完剩下 3 条 → 庆祝页 → 4 秒后回主界面
+key ok
+key down
+key ok
+key down
+key ok
+expect view Celebrate
+shot 05_celebrate
+wait 5
+expect view Main
+expect stars 1
+shot 06_all_done
+expect panel
+
+# --- 长按 3 秒进家长设置；网页 API：周六设为休息日、非法输入被拒
+hold ok 3.5
+expect view Edit
+shot 07_edit
+http GET /api/state
+http PUT /api/day?date=2026-10-17 {"rest":true,"items":[]}
+http PUT /api/day?date=2026-10-16 {"items":[{"text":"画画😀","icon":"huahua"}]}
+http PUT /api/day?date=2026-10-16 {"items":[{"text":"一二三四五六七八九十十一"}]}
+http POST /api/exit
+expect view Main
+expect panel
+wait 31
+expect sleeping
+
+# --- 周六 04:00 定时唤醒换日 → 休息日，自动再睡
+jump 2026-10-17 03:59
+wait 90
+expect sleeping
+shot 08_saturday_rest
+expect panel
+
+# --- 周日：周末模板 3 条，只做了 1 条
+jump 2026-10-18 09:00
+wait 1
+shot 09_sunday_morning
+key down
+key ok
+shot 10_sunday_one_done
+wait 31
+
+# --- 周一：周日没做完 → 连续天数归零，星星保留
+jump 2026-10-19 16:30
+wait 1
+key up
+expect stars 1
+shot 11_monday
+expect panel
+
+# --- 断电重启：状态都在
+key ok
+power-cycle
+expect done 1
+expect panel
+shot 12_after_power_cycle
+
+# --- 连续按 25 次（含自动插入的全刷）后屏幕仍然正确
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+key ok
+expect panel
+
+# --- 低电量：下次唤醒时读到
+battery 10
+wait 31
+key up
+shot 13_low_battery
+battery 80
+
+# --- 没配过 WiFi：长按进入配网页，提交 WiFi 后转为编辑模式
+wifi off
+hold ok 3.5
+expect view Setup
+shot 14_setup
+http POST /api/wifi {"ssid":"MyHome","pass":"12345678"}
+expect view Edit
+
+# --- 周一模板改成 8 条，超过一屏要能滚动
+http PUT /api/templates {"days":[[{"text":"口算20题","icon":"kousuan"},{"text":"语文阅读","icon":"yuedu"},{"text":"英语听读","icon":"tingdu"},{"text":"练字一页","icon":"lianzi"},{"text":"背古诗","icon":"beisong"},{"text":"订正错题","icon":"dingzheng"},{"text":"练琴半小时","icon":"lianqin"},{"text":"整理书包","icon":"shubao"}],[],[],[],[],[],[]]}
+http POST /api/exit
+expect view Main
+shot 15_eight_items
+key down
+key down
+key down
+key down
+key down
+key down
+key down
+shot 16_scrolled
+expect panel

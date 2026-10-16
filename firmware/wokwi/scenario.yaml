@@ -1,0 +1,40 @@
+# Wokwi 自动化场景：真固件 + GxEPD2 真驱动 + UC8179 仿真芯片。
+# 运行（在 firmware/ 下）：
+#   wokwi/build.sh
+#   WOKWI_CLI_TOKEN=... ~/.wokwi/bin/wokwi-cli wokwi --scenario wokwi/scenario.yaml --timeout 180000 > wokwi/shots/run.out
+#   python3 ../tools/wokwi_frames.py wokwi/shots/run.out wokwi/shots/
+# wokwi-cli 截不了自定义芯片的图：画面由芯片打到控制台，用 tools/wokwi_frames.py 还原成 PNG
+name: 'eink-todo 一天的基本流程'
+version: 1
+author: 'eink-todo'
+steps:
+  - wait-serial: 'boot: reason=0'
+  # 开机：连 Wokwi-GUEST、NTP 校时、全刷
+  - wait-serial: 'booted'
+
+  # 立刻连按：确认、下、确认。第一下落在开机全刷期间也不能丢（按键中断锁存）
+  - set-control: { part-id: btnOk, control: pressed, value: 1 }
+  - delay: 120ms
+  - set-control: { part-id: btnOk, control: pressed, value: 0 }
+  - delay: 300ms
+  - set-control: { part-id: btnDown, control: pressed, value: 1 }
+  - delay: 120ms
+  - set-control: { part-id: btnDown, control: pressed, value: 0 }
+  - delay: 300ms
+  - set-control: { part-id: btnOk, control: pressed, value: 1 }
+  - delay: 120ms
+  - set-control: { part-id: btnOk, control: pressed, value: 0 }
+  - delay: 3000ms
+
+  # 30 秒无操作 → 控制器深睡 + ESP32 深睡。
+  # Wokwi 不模拟 S3 的真深睡：会直接复位重启（醒来原因是上电），正好验证「掉电后状态都在」
+  - wait-serial: 'deep sleep'
+  - wait-serial: 'booted'
+  - delay: 2000ms
+
+  # 长按确认 3 秒 → 家长编辑模式（二维码，地址是 Wokwi 虚拟网络里的 IP）
+  - set-control: { part-id: btnOk, control: pressed, value: 1 }
+  - delay: 3500ms
+  - set-control: { part-id: btnOk, control: pressed, value: 0 }
+  - wait-serial: 'NTP'
+  - delay: 3000ms

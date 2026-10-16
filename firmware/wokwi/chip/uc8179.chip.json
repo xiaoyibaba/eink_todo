@@ -1,0 +1,6 @@
+{
+  "name": "UC8179 7.5in ePaper",
+  "author": "eink-todo",
+  "pins": ["VCC", "GND", "SCK", "SDI", "CS", "DC", "RST", "BUSY"],
+  "display": { "width": 800, "height": 480 }
+}
